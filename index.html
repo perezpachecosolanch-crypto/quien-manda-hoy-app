@@ -3,384 +3,271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>¿Quién manda hoy?</title>
-    <!-- Fuente moderna e impactante -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>¿Quién manda hoy? - Test de Control Mental</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --bg-base: #0a0a0a;
-            --text-main: #f4f4f5;
-            --text-dim: #a1a1aa;
-            --accent: #ef4444; /* Rojo urgencia */
-            --glass-bg: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-        }
-
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap');
         body {
-            background-color: var(--bg-base);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            line-height: 1.6;
-            overflow: hidden; /* Elimina scroll, mantiene foco */
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #e5e5e5;
         }
-
-        .container {
-            width: 100%;
-            max-width: 440px;
-            padding: 2rem;
-            position: relative;
-        }
-
-        /* Views management */
-        .view {
-            display: none;
-            opacity: 0;
-            transform: translateY(15px);
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .view.active {
-            display: block;
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Typography */
-        h1 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            margin-bottom: 0.5rem;
-        }
-
-        .subtitle {
-            color: var(--text-dim);
-            font-size: 1rem;
-            margin-bottom: 2.5rem;
-        }
-
-        /* Buttons (Answers) */
-        .btn {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            color: var(--text-main);
-            padding: 1.1rem 1.25rem;
-            width: 100%;
-            border-radius: 12px;
-            font-size: 1.05rem;
-            font-weight: 500;
-            text-align: left;
-            cursor: pointer;
-            margin-bottom: 0.8rem;
+        .option-btn {
             transition: all 0.2s ease;
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
         }
-
-        .btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateY(-2px);
-            border-color: rgba(255, 255, 255, 0.2);
+        .option-btn:active {
+            transform: scale(0.98);
         }
-
-        .btn:active {
-            transform: translateY(0);
+        .loading-dots:after {
+            content: '.';
+            animation: dots 1s steps(5, end) infinite;
         }
-
-        /* Result explanation popup */
-        .explanation {
-            display: none;
-            margin-top: 1.5rem;
-            padding: 1.25rem;
-            background: rgba(239, 68, 68, 0.05);
-            border-left: 3px solid var(--accent);
-            border-radius: 4px 12px 12px 4px;
-            font-size: 0.95rem;
-            color: var(--text-dim);
-            animation: fadeIn 0.4s ease forwards;
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
         }
-
-        .explanation strong {
-            color: var(--text-main);
-            display: block;
-            margin-bottom: 0.4rem;
-        }
-
-        /* Final Impact Screen */
-        .impact-container {
-            text-align: center;
-        }
-
-        .impact-line {
-            opacity: 0;
-            font-size: 1.2rem;
-            font-weight: 500;
-            margin-bottom: 2rem;
-            color: var(--text-dim);
-            transform: translateY(10px);
-            transition: all 1s ease;
-        }
-
-        .impact-line.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .final-blow {
-            opacity: 0;
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--accent);
-            margin-top: 3rem;
-            letter-spacing: -0.02em;
-            transform: scale(0.95);
-            transition: all 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .final-blow.visible {
-            opacity: 1;
-            transform: scale(1);
-        }
-        
-        /* Navigation Button */
-        .next-btn {
-            display: none;
-            margin-top: 2rem;
-            background: var(--text-main);
-            color: var(--bg-base);
-            border: none;
-            padding: 1rem;
-            width: 100%;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: opacity 0.3s;
-            animation: fadeIn 0.5s ease 1s forwards; /* Button appears slightly after explanation */
-            opacity: 0;
-        }
-
-        .next-btn:hover {
-            opacity: 0.9;
-        }
-
-        /* Start Button */
-        .start-btn {
-            display: inline-block;
-            margin-top: 2rem;
-            background: transparent;
-            color: var(--text-dim);
-            border: 1px solid var(--glass-border);
-            padding: 0.8rem 2rem;
-            border-radius: 30px;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .start-btn:hover {
-            color: var(--text-main);
-            border-color: var(--text-dim);
-        }
-
-        /* Progress Dots */
-        .progress {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 2rem;
-        }
-
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--glass-border);
-            transition: all 0.3s;
-        }
-
-        .dot.active {
-            background: var(--text-main);
-            width: 24px;
-            border-radius: 4px;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Utilities */
-        .correct-choice {
-            background: rgba(255, 255, 255, 0.1) !important;
-            border-color: rgba(255, 255, 255, 0.4) !important;
-        }
-        
-        .disabled {
-            pointer-events: none;
-            opacity: 0.5;
-        }
-
     </style>
 </head>
-<body>
+<body class="flex items-center justify-center min-h-screen p-6">
 
-    <div class="container">
-        
-        <!-- Intro -->
-        <div id="intro" class="view active" style="text-align: center;">
-            <p class="subtitle" style="margin-bottom: 1rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent);">Test de Control Mental</p>
-            <h1>¿Quién manda hoy?</h1>
-            <p class="subtitle" style="margin-top: 1rem;">Mide el costo invisible de tus distracciones.</p>
-            <button class="start-btn" onclick="startQuiz()">Comenzar (60s)</button>
+    <div id="app" class="max-w-md w-full">
+        <!-- Pantalla de Inicio -->
+        <div id="screen-start" class="text-center space-y-8">
+            <h1 class="text-3xl font-bold tracking-tighter text-white">¿Quién manda hoy?</h1>
+            <p class="text-gray-400 leading-relaxed">Un test de 45 segundos para medir tu nivel real de control mental.</p>
+            <button onclick="startQuiz()" class="bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition-colors">
+                EMPEZAR
+            </button>
         </div>
 
-        <!-- Question 1 -->
-        <div id="q1" class="view">
-            <div class="progress">
-                <div class="dot active"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
+        <!-- Pantalla de Preguntas -->
+        <div id="screen-quiz" class="hidden space-y-6">
+            <div class="flex justify-between items-center text-xs text-gray-500 uppercase tracking-widest mb-4">
+                <span id="question-number">Pregunta 1 de 3</span>
             </div>
-            <h1>Cuando miras el móvil solo 1 minuto...</h1>
-            <p class="subtitle">¿Cuánto tiempo real pierdes en recuperar el foco?</p>
             
-            <div class="options" id="opts1">
-                <button class="btn" onclick="handleAnswer(1, this)">1 minuto</button>
-                <button class="btn" onclick="handleAnswer(1, this)">5 minutos</button>
-                <button class="btn" onclick="handleAnswer(1, this, true)">23 minutos</button>
+            <h2 id="question-text" class="text-xl font-medium leading-snug text-white"></h2>
+
+            <div id="options-container" class="space-y-3">
+                <!-- Opciones dinámicas -->
             </div>
 
-            <div id="exp1" class="explanation">
-                <strong>La cruda realidad:</strong>
-                Tu cerebro tarda exactamente 23 minutos y 15 segundos en volver al mismo nivel de concentración. Un (1) minuto en notificaciones = 24 minutos perdidos.
+            <div id="feedback" class="hidden p-4 rounded-lg bg-zinc-900 border border-zinc-800 animate-in fade-in duration-500">
+                <p id="feedback-text" class="text-sm leading-relaxed"></p>
+                <button onclick="nextQuestion()" class="mt-4 text-xs font-bold text-white underline underline-offset-4 uppercase tracking-tighter">Continuar</button>
             </div>
-            <button id="next1" class="next-btn" onclick="nextQuestion(2)">Siguiente impacto →</button>
         </div>
 
-        <!-- Question 2 -->
-        <div id="q2" class="view">
-            <div class="progress">
-                <div class="dot"></div>
-                <div class="dot active"></div>
-                <div class="dot"></div>
+        <!-- Pantalla Final -->
+        <div id="screen-result" class="hidden space-y-8 text-center">
+            <div class="space-y-4">
+                <h2 class="text-2xl font-bold text-white">Análisis Completado</h2>
+                <div class="py-6 border-y border-zinc-800">
+                    <p class="text-xl text-red-500 font-bold mb-2">“No decides tú… decide el estímulo.”</p>
+                    <p class="text-gray-400 text-sm">No es falta de disciplina. Es pérdida constante de foco.</p>
+                </div>
             </div>
-            <h1>Si revisas el móvil 3 veces en una hora de trabajo...</h1>
-            <p class="subtitle">¿Qué pasa con tu rendimiento?</p>
+
+            <!-- Diagnóstico de Debilidad -->
+            <div id="ai-section" class="bg-zinc-900/50 p-6 rounded-2xl border border-zinc-800 text-left space-y-4">
+                <h3 class="text-white font-bold text-sm uppercase tracking-wider">✨ Diagnóstico de Debilidad</h3>
+                <p class="text-xs text-gray-400">Confiesa: ¿Cuál es esa distracción que te roba el control hoy? (Ej: "Móvil", "Instagram", "Revisar el mail").</p>
+                
+                <input type="text" id="distraction-input" 
+                    placeholder="Escribe tu distracción aquí..." 
+                    class="w-full bg-black border border-zinc-700 rounded-lg p-3 text-sm focus:outline-none focus:border-white transition-colors text-white">
+                
+                <button id="analyze-btn" onclick="analyzeDistraction()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg text-sm transition-all flex items-center justify-center gap-2">
+                    <span>✨ ANALIZAR MI FALLO</span>
+                </button>
+
+                <div id="ai-response-container" class="hidden mt-4 pt-4 border-t border-zinc-800 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                    <p id="ai-response" class="text-sm italic text-gray-300 leading-relaxed"></p>
+                    <div id="ai-action-plan" class="mt-3 p-3 bg-indigo-950/20 border border-indigo-900/50 rounded-lg">
+                        <p class="text-[10px] uppercase font-bold text-indigo-400 mb-1">Micro-hábito sugerido:</p>
+                        <p id="ai-microhabit" class="text-xs text-indigo-200"></p>
+                    </div>
+                </div>
+
+                <div id="ai-loading" class="hidden text-center py-4">
+                    <p class="text-xs text-gray-500 loading-dots font-mono text-indigo-400">Escaneando patrones de comportamiento</p>
+                </div>
+                
+                <div id="ai-error" class="hidden text-center py-2 text-red-500 text-xs">
+                    Hubo un problema. Inténtalo de nuevo.
+                </div>
+            </div>
             
-            <div class="options" id="opts2">
-                <button class="btn" onclick="handleAnswer(2, this)">Se mantiene igual</button>
-                <button class="btn" onclick="handleAnswer(2, this)">Baja ligeramente</button>
-                <button class="btn" onclick="handleAnswer(2, this, true)">Nunca alcanzas foco profundo</button>
-            </div>
+            <p class="text-xl font-light italic text-white leading-tight py-4">
+                “Cada interrupción no cuesta segundos… <br><span class="font-bold text-red-500">cuesta control.</span>”
+            </p>
 
-            <div id="exp2" class="explanation">
-                <strong>Matemática destructiva:</strong>
-                Al tardar 23 minutos en recuperarte cada vez, 3 interrupciones fragmentan por completo tu atención. Tu cerebro se queda atrapado en "modo superficial" toda la hora.
-            </div>
-            <button id="next2" class="next-btn" onclick="nextQuestion(3)">Siguiente impacto →</button>
+            <button onclick="location.reload()" class="text-xs text-gray-500 hover:text-white transition-colors">REPETIR TEST</button>
         </div>
-
-        <!-- Question 3 -->
-        <div id="q3" class="view">
-            <div class="progress">
-                <div class="dot"></div>
-                <div class="dot"></div>
-                <div class="dot active"></div>
-            </div>
-            <h1>El llamado "residuo de atención" afecta principalmente:</h1>
-            <p class="subtitle">El costo oculto en tu cerebro.</p>
-            
-            <div class="options" id="opts3">
-                <button class="btn" onclick="handleAnswer(3, this)">Tu memoria a corto plazo</button>
-                <button class="btn" onclick="handleAnswer(3, this, true)">Tu capacidad de concentración profunda</button>
-                <button class="btn" onclick="handleAnswer(3, this)">Tu velocidad de lectura</button>
-            </div>
-
-            <div id="exp3" class="explanation">
-                <strong>El fantasma digital:</strong>
-                Cada vez que cambias de pantalla, una parte de tu cerebro se queda pensando en la anterior. Estás físicamente frente a tu trabajo, pero mentalmente sigues en tu móvil.
-            </div>
-            <button id="next3" class="next-btn" onclick="showFinal()">Ver resultado final</button>
-        </div>
-
-        <!-- Final Impact Screen -->
-        <div id="final" class="view impact-container">
-            <p class="impact-line" id="line1">👉 No es falta de disciplina.</p>
-            <p class="impact-line" id="line2">Es pérdida constante de foco.</p>
-            <p class="impact-line" id="line3" style="margin-top: 3rem;">👉 No decides tú…</p>
-            <p class="impact-line" id="line4">decide el estímulo.</p>
-            
-            <h1 class="final-blow" id="line5">Cada interrupción no cuesta segundos.<br>Cuesta control.</h1>
-        </div>
-
     </div>
 
     <script>
-        function hideAllViews() {
-            document.querySelectorAll('.view').forEach(v => {
-                v.classList.remove('active');
-                setTimeout(() => { v.style.display = 'none'; }, 300); // Wait for fade out
+        const apiKey = ""; 
+        const questions = [
+            {
+                q: "Cuando miras el móvil solo 1 minuto, ¿cuánto tiempo real pierdes en recuperar el foco total?",
+                options: ["1 minuto", "5 minutos", "23 minutos"],
+                correct: 2,
+                explanation: "Se llama <b>Residuo de Atención</b>. Tu cerebro tarda hasta 23 minutos en volver plenamente a la tarea anterior tras una 'miradita'."
+            },
+            {
+                q: "Si revisas el móvil 3 veces en una hora de trabajo intenso, ¿qué ocurre con tu mente?",
+                options: ["Baja ligeramente el ritmo", "Nunca alcanzas el foco profundo", "Se mantiene igual"],
+                correct: 1,
+                explanation: "Al fragmentar la atención cada 20 min, impides que tu cerebro entre en 'Estado de Flow'. Trabajas en la superficie, siempre."
+            },
+            {
+                q: "El costo más alto del residuo de atención no es el tiempo, sino el desgaste de:",
+                options: ["Tu memoria", "Tu capacidad de concentración profunda", "Tu velocidad de escritura"],
+                correct: 1,
+                explanation: "Cada interrupción drena tu energía cognitiva. Al final del día estás agotado no por trabajar mucho, sino por interrumpirte demasiado."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let canAnswer = true;
+
+        function startQuiz() {
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-quiz').classList.remove('hidden');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            canAnswer = true;
+            const qData = questions[currentQuestion];
+            document.getElementById('question-number').innerText = `Pregunta ${currentQuestion + 1} de 3`;
+            document.getElementById('question-text').innerText = qData.q;
+            document.getElementById('feedback').classList.add('hidden');
+            
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            
+            qData.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "option-btn w-full text-left p-4 rounded-xl border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 hover:border-zinc-700 transition-all text-sm";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(index);
+                container.appendChild(btn);
             });
         }
 
-        function showView(id) {
-            hideAllViews();
-            setTimeout(() => {
-                const view = document.getElementById(id);
-                view.style.display = 'block';
-                // Trigger reflow
-                void view.offsetWidth;
-                view.classList.add('active');
-            }, 350);
+        function checkAnswer(index) {
+            if (!canAnswer) return;
+            canAnswer = false;
+            
+            const qData = questions[currentQuestion];
+            const options = document.querySelectorAll('.option-btn');
+            
+            options.forEach((btn, i) => {
+                if (i === qData.correct) {
+                    btn.classList.add('border-green-900', 'bg-green-950/20', 'text-green-400');
+                } else if (i === index) {
+                    btn.classList.add('border-red-900', 'bg-red-950/20', 'text-red-400');
+                }
+                btn.disabled = true;
+            });
+
+            document.getElementById('feedback-text').innerHTML = qData.explanation;
+            document.getElementById('feedback').classList.remove('hidden');
         }
 
-        function startQuiz() {
-            showView('q1');
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
         }
 
-        function handleAnswer(qNum, btnEl, isCorrect = false) {
-            // Disable other buttons
-            const optionsDiv = document.getElementById('opts' + qNum);
-            const buttons = optionsDiv.querySelectorAll('.btn');
-            buttons.forEach(b => b.classList.add('disabled'));
-            
-            // Highlight selected
-            btnEl.classList.add('correct-choice');
-            btnEl.classList.remove('disabled');
-
-            // Show explanation and next button
-            document.getElementById('exp' + qNum).style.display = 'block';
-            document.getElementById('next' + qNum).style.display = 'block';
+        function showResult() {
+            document.getElementById('screen-quiz').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
         }
 
-        function nextQuestion(num) {
-            showView('q' + num);
+        async function analyzeDistraction() {
+            const input = document.getElementById('distraction-input');
+            const distraction = input.value.trim();
+            if (!distraction) return;
+
+            const btn = document.getElementById('analyze-btn');
+            const loader = document.getElementById('ai-loading');
+            const errorDiv = document.getElementById('ai-error');
+            const resultContainer = document.getElementById('ai-response-container');
+
+            btn.disabled = true;
+            loader.classList.remove('hidden');
+            errorDiv.classList.add('hidden');
+            resultContainer.classList.add('hidden');
+
+            const systemPrompt = "Eres un experto en neurociencia de la atención. El usuario te dirá su distracción principal. Responde con un objeto JSON: 1) 'diagnosis': una frase corta (15 palabras máx) sobre por qué eso le quita el mando de su vida. 2) 'microhabit': una acción de 5 segundos para neutralizar el impulso. Sé directo y brutalmente honesto.";
+            const userPrompt = `Mi distracción principal es: ${distraction}`;
+
+            try {
+                const responseText = await callGemini(userPrompt, systemPrompt);
+                const data = JSON.parse(responseText);
+                
+                document.getElementById('ai-response').innerText = `"${data.diagnosis}"`;
+                document.getElementById('ai-microhabit').innerText = data.microhabit;
+                
+                resultContainer.classList.remove('hidden');
+            } catch (error) {
+                console.error("Error en análisis:", error);
+                errorDiv.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                loader.classList.add('hidden');
+            }
         }
 
-        function showFinal() {
-            showView('final');
+        async function callGemini(userQuery, systemPrompt) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
             
-            // Sequence of impact lines
-            setTimeout(() => document.getElementById('line1').classList.add('visible'), 800);
-            setTimeout(() => document.getElementById('line2').classList.add('visible'), 1600);
-            
-            setTimeout(() => document.getElementById('line3').classList.add('visible'), 3500);
-            setTimeout(() => document.getElementById('line4').classList.add('visible'), 4300);
-            
-            setTimeout(() => document.getElementById('line5').classList.add('visible'), 6500);
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            diagnosis: { type: "STRING" },
+                            microhabit: { type: "STRING" }
+                        },
+                        required: ["diagnosis", "microhabit"]
+                    }
+                }
+            };
+
+            const maxRetries = 5;
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                    
+                    const result = await response.json();
+                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (!text) throw new Error("No content in response");
+                    return text;
+                } catch (err) {
+                    if (i === maxRetries - 1) throw err;
+                    const delay = Math.pow(2, i) * 1000;
+                    await new Promise(res => setTimeout(res, delay));
+                }
+            }
         }
     </script>
 </body>
