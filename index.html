@@ -109,7 +109,6 @@
     </div>
 
     <script>
-        const apiKey = ""; 
         const questions = [
             {
                 q: "Cuando miras el móvil solo 1 minuto, ¿cuánto tiempo real pierdes en recuperar el foco total?",
@@ -195,7 +194,7 @@
 
         async function analyzeDistraction() {
             const input = document.getElementById('distraction-input');
-            const distraction = input.value.trim();
+            const distraction = input.value.trim().toLowerCase();
             if (!distraction) return;
 
             const btn = document.getElementById('analyze-btn');
@@ -208,66 +207,68 @@
             errorDiv.classList.add('hidden');
             resultContainer.classList.add('hidden');
 
-            const systemPrompt = "Eres un experto en neurociencia de la atención. El usuario te dirá su distracción principal. Responde con un objeto JSON: 1) 'diagnosis': una frase corta (15 palabras máx) sobre por qué eso le quita el mando de su vida. 2) 'microhabit': una acción de 5 segundos para neutralizar el impulso. Sé directo y brutalmente honesto.";
-            const userPrompt = `Mi distracción principal es: ${distraction}`;
-
-            try {
-                const responseText = await callGemini(userPrompt, systemPrompt);
-                const data = JSON.parse(responseText);
-                
-                document.getElementById('ai-response').innerText = `"${data.diagnosis}"`;
-                document.getElementById('ai-microhabit').innerText = data.microhabit;
-                
-                resultContainer.classList.remove('hidden');
-            } catch (error) {
-                console.error("Error en análisis:", error);
-                errorDiv.classList.remove('hidden');
-            } finally {
-                btn.disabled = false;
-                loader.classList.add('hidden');
-            }
+            // Simulamos el tiempo de procesamiento de la IA (1.5 a 2.5 segundos)
+            const delay = Math.floor(Math.random() * 1000) + 1500;
+            
+            setTimeout(() => {
+                try {
+                    const data = generateSimulatedResponse(distraction);
+                    
+                    document.getElementById('ai-response').innerText = `"${data.diagnosis}"`;
+                    document.getElementById('ai-microhabit').innerText = data.microhabit;
+                    
+                    resultContainer.classList.remove('hidden');
+                } catch (error) {
+                    console.error("Error en análisis predictivo:", error);
+                    errorDiv.classList.remove('hidden');
+                } finally {
+                    btn.disabled = false;
+                    loader.classList.add('hidden');
+                }
+            }, delay);
         }
 
-        async function callGemini(userQuery, systemPrompt) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        // Simulación de IA sin conexión a API
+        function generateSimulatedResponse(input) {
+            const insights = [
+                {
+                    keywords: ["movil", "móvil", "celular", "telefono", "teléfono", "pantalla"],
+                    diagnosis: "Tu teléfono es un tragaperras de dopamina diseñado para que nunca lo sueltes.",
+                    microhabit: "Pon el móvil en otra habitación o en modo avión durante tus bloques de 60 min de foco."
+                },
+                {
+                    keywords: ["instagram", "tiktok", "redes", "sociales", "facebook", "twitter", "x"],
+                    diagnosis: "Estás regalando tu energía mental máxima a algoritmos que monetizan tu distracción pasiva.",
+                    microhabit: "Elimina la app de la pantalla de inicio o pon la pantalla de tu móvil en blanco y negro."
+                },
+                {
+                    keywords: ["correo", "email", "mail", "gmail", "outlook", "mensajes", "whatsapp", "slack"],
+                    diagnosis: "Revisar la bandeja constantemente es una falsa productividad. Reaccionas a la agenda de otros.",
+                    microhabit: "Desactiva notificaciones y define 2 bloques diarios estrictos (ej: 12:00 y 17:00) para responder todo."
+                },
+                {
+                    keywords: ["pensamientos", "ansiedad", "mente", "soñar", "divagar", "procrastinacion", "procrastinar"],
+                    diagnosis: "Huyes de la incomodidad de empezar la tarea pesada buscando refugio en distracciones.",
+                    microhabit: "Aplica la regla de los 2 minutos: Oblígate a hacer la tarea de forma mediocre por 120 segundos."
+                },
+                {
+                    keywords: ["youtube", "videos", "netflix", "series", "musica", "música"],
+                    diagnosis: "El consumo pasivo adormece tu cerebro e impide entrar en el estado cognitivo profundo.",
+                    microhabit: "Apaga el autoplay en todas las plataformas y haz que cada clic requiera intención consciente."
+                }
+            ];
+
+            let found = insights.find(item => item.keywords.some(kw => input.includes(kw)));
             
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            diagnosis: { type: "STRING" },
-                            microhabit: { type: "STRING" }
-                        },
-                        required: ["diagnosis", "microhabit"]
-                    }
-                }
-            };
-
-            const maxRetries = 5;
-            for (let i = 0; i < maxRetries; i++) {
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-                    
-                    const result = await response.json();
-                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (!text) throw new Error("No content in response");
-                    return text;
-                } catch (err) {
-                    if (i === maxRetries - 1) throw err;
-                    const delay = Math.pow(2, i) * 1000;
-                    await new Promise(res => setTimeout(res, delay));
-                }
+            // Si no detecta palabra clave específica, da una respuesta de alto impacto genérica
+            if (!found) {
+                found = {
+                    diagnosis: `Ese escape momentáneo fragmenta tu neuroplasticidad e interrumpe tu estado de Flow total.`,
+                    microhabit: "Antes de ceder al estímulo, cuenta mentalmente hasta 10, respira hondo y rompe el automatismo."
+                };
             }
+
+            return found;
         }
     </script>
 </body>
